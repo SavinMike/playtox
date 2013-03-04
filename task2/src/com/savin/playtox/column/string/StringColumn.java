@@ -17,35 +17,42 @@ import java.util.List;
  */
 public class StringColumn extends Column<String> {
     private List<String> strings;
-    public StringColumn(int i){
+
+    public StringColumn(int i) {
         super(i);
     }
 
-    public int maxLength(){
-            strings=new ArrayList<>();
+    public int maxLength() {
+        strings = new ArrayList<>();
 
-            for(String s:super.getData()){
-                List<String> str=StringParser.parsString(s," ");
-                if(!strings.containsAll(str))
-                    strings.addAll(str);
+        for (String s : super.getData()) {
+            List<String> str = StringParser.parsString(s, " ");
+            if (!strings.containsAll(str))
+                strings.addAll(str);
+        }
+
+        int max = Collections.max(strings, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.length() - o2.length();
             }
-
-            int max=Collections.max(strings,new Comparator<String>() {
-                public int compare(String o1, String o2) {
-                    return o1.length()-o2.length();
-                }
-            }).length();
+        }).length();
 
         return max;
     }
-    public String toString(int i,int fullSizeColumn){
-        String s=super.getData().get(i).toString();
 
-        if(super.getData().get(i).contains(" ")){
-            s=s.substring(0,s.indexOf(" "));
+    public String toString(int i, int fullSizeColumn) {
+        String s;
+        if (i == -1) {
+            s = "";
+        } else {
+            s = super.getData().get(i).toString();
+
+            if (super.getData().get(i).contains(" ")) {
+                s = s.substring(0, s.indexOf(" "));
+            }
         }
-        return StringParser.convString(fullSizeColumn,super.getColumnNumber(),super.chString(s," "),s);
+
+        return StringParser.convString(fullSizeColumn, super.getColumnNumber(), super.spaceString(s, " "), s);
     }
-
-
 }

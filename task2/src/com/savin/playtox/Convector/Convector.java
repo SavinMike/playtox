@@ -10,9 +10,7 @@ import com.savin.playtox.parser.StringParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Convector implements AutoCloseable {
     private List<Column> columns = new ArrayList<>();
@@ -55,20 +53,24 @@ public class Convector implements AutoCloseable {
         writer.writeStartTable(fullLength, columns.size());
 
         while (numberOfRow < columnDataSize) {
+            int i = 0;
+            LinkedHashMap<Integer, List<String>> strings = new LinkedHashMap<>();
             for (Column column : columns) {
                 if (column.getClass().getSimpleName().equals("StringColumn")) {
-                    List<String> strings = StringParser.parsString(column.getData().get(numberOfRow).toString(), " ");
-                    for (String s2 : strings) {
-                        this.writeRow(numberOfRow, s2, flag);
-                        flag = true;
-                        writer.write("\n");
-                    }
+                    strings.put(i, StringParser.parsString(column.getData().get(numberOfRow).toString(), " "));
 
-
+                }
+                i++;
+            }
+            int max = Collections.max(strings.values(), new Comparator<List<String>>() {
+                public int compare(List<String> o1, List<String> o2) {
+                    return o1.size() - o2.size();
+                }
+            }).size();
+            this.writeRow(numberOfRow, max, strings, flag);
             writer.writeEndRow(columns);
             flag = false;
-                }
-            }
+
             numberOfRow++;
 
         }
@@ -101,31 +103,42 @@ public class Convector implements AutoCloseable {
         }
     }
 
-    private void writeRow(int numberOfRow, String s, boolean flag) throws IOException {
-        String columnType;
-        for (int i = 0; i < columns.size(); i++) {
+    private void writeRow(int numberOfRow, int maxStringRow, LinkedHashMap<Integer, List<String>> strings, boolean flag) throws IOException {
+        String columnType, s;
+        int j;
+        for (int i = 0; i < maxStringRow; i++) {
+            j = 0;
             for (Column column : columns) {
                 columnType = column.getClass().getSimpleName();
-                if (i == column.getColumnNumber() && columnType.equals("MoneyColumn")) {
+                if (columnType.equals("MoneyColumn")) {
                     if (!flag)
                         writer.write(column.toString(numberOfRow, columns.size()));
                     else {
                         writer.write(column.toString(-1, columns.size()));
                     }
                 }
-                if (i == column.getColumnNumber() && columnType.equals("StringColumn")) {
+                if (columnType.equals("StringColumn")) {
+                    if (strings.get(j).size() > i)
+                        s = strings.get(j).get(i);
+                    else
+                        s = "";
                     writer.write(StringParser.convString(columns.size(), column.getColumnNumber(),
-                            column.chString(s, " "), s));
+                            column.spaceString(s, " "), s));
                 }
-                if (i == column.getColumnNumber() && columnType.equals("IntegerColumn")) {
+                if (columnType.equals("IntegerColumn")) {
                     if (!flag)
                         writer.write(column.toString(numberOfRow, columns.size()));
                     else
                         writer.write(column.toString(-1, columns.size()));
                 }
+                j++;
+
             }
+            flag = true;
+            writer.write("\n");
         }
     }
-
 }
+
+
 

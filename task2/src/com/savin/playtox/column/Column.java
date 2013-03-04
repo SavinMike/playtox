@@ -36,7 +36,7 @@ public class Column<T extends Comparable<T>> {
         return maxT.toString().trim().length();
     }
 
-    public String chString(String string, String ch) {
+    public String spaceString(String string, String ch) {
         StringBuilder sb = new StringBuilder();
         int diff = maxLength() - string.length();
         while (diff > 0) {
@@ -52,7 +52,7 @@ public class Column<T extends Comparable<T>> {
             s = data.get(i).toString();
         else
             s = "";
-        return StringParser.convNumber(fullSizeColumn, getColumnNumber(), chString(s, " "), s);
+        return StringParser.convNumber(fullSizeColumn, getColumnNumber(), spaceString(s, " "), s);
 
     }
 
